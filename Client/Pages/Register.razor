@@ -1,22 +1,25 @@
 ﻿@page "/register"
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Buttons
+@using Proj_APBD.Shared.Models.DTOs
 @inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+@inject IJSRuntime Js
 
 <h3>Register</h3>
 
 <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
-    <SfTextBox Placeholder="Username"/>
+    <SfTextBox Placeholder="Username" OnInput="(e) => Username = e.Value.ToString()"/>
 </div>
 <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
-    <SfTextBox Placeholder="Password" Type="InputType.Password"/>
+    <SfTextBox Placeholder="Password" Type="InputType.Password" OnInput="(e) => NewPassword = e.Value.ToString()"/>
 </div>
 <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
-    <SfTextBox Placeholder="Confirm Password" Type="InputType.Password"/>
+    <SfTextBox Placeholder="Confirm Password" Type="InputType.Password" OnInput="(e) => RepeatNewPassword = e.Value.ToString()"/>
 </div>
 <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
     <div class="col-xs-12 col-sm-12 col-lg-6 col-md-6">
-        <SfButton IsPrimary="true" CssClass="e-outline">Register</SfButton>
+        <SfButton IsPrimary="true" CssClass="e-outline" @onclick="@OnRegister">Register</SfButton>
     </div>
     <div class="col-xs-12 col-sm-12 col-lg-6 col-md-6">
         <SfButton CssClass="e-flat" IsPrimary="true">Go Back</SfButton>
@@ -24,5 +27,29 @@
 </div>
 
 @code {
+    private string Username { get; set; }
+    private string NewPassword { get; set; }
+    private string RepeatNewPassword { get; set; }
     
+    private async Task OnRegister()
+    {
+        if (NewPassword != RepeatNewPassword)
+        {
+            return;
+        }
+        
+        var dto = new UserDTO() { Username = Username, Password = NewPassword };
+        var registerResponse = await HttpClient.PostAsJsonAsync("api/Accounts/register", dto);
+        if (!registerResponse.IsSuccessStatusCode)
+        {
+            Console.WriteLine(registerResponse.StatusCode);
+            return;
+        }        
+        
+        var loginResponse = await HttpClient.PostAsJsonAsync("api/Accounts/login", dto);
+        var tokens = await loginResponse.Content.ReadFromJsonAsync<JwtDTO>();
+        await Js.InvokeVoidAsync("localStorage.setItem", "jwt", tokens.Token);
+        await Js.InvokeVoidAsync("localStorage.setItem", "ref", tokens.Ref);
+        NavigationManager.NavigateTo("/account");
+    }
 }

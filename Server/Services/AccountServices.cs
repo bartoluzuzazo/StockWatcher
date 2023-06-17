@@ -113,6 +113,8 @@ public class AccountServices : IAccountServices
 
     public async Task<bool> UserExistsAsync(string username)
     {
-        return await _context.Users.FirstOrDefaultAsync(u => string.Equals(u.Username, username, StringComparison.CurrentCultureIgnoreCase)) is not null;
+        var users = await _context.Users.ToListAsync();
+        var user = users.Find(u => string.Equals(u.Username, username, StringComparison.CurrentCultureIgnoreCase));
+        return user is not null;
     }
 }

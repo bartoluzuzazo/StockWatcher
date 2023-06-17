@@ -51,12 +51,18 @@
     protected override async Task OnInitializedAsync()
     {
         token = await Js.InvokeAsync<string>("localStorage.getItem", "jwt");
+        if (token == "")
+        {
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
         var message = new HttpRequestMessage(HttpMethod.Get, "api/Accounts/data");
         message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         var response = await HttpClient.SendAsync(message);
         if (!response.IsSuccessStatusCode)
         {
             NavigationManager.NavigateTo("/login");
+            return;
         }
         var claims = await response.Content.ReadFromJsonAsync<List<ClaimDTO>>();
 
@@ -65,7 +71,7 @@
         Role = claims!.First(c => c.Type == "Role").Value;
     }
 
-    public async Task Logout()
+    private async Task Logout()
     {
         await Js.InvokeVoidAsync("localStorage.setItem", "jwt", "");
         await Js.InvokeVoidAsync("localStorage.setItem", "ref", "");
