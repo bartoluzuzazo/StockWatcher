@@ -1,9 +1,28 @@
 ﻿@page "/"
+@using Proj_APBD.Client.Models.DTOs
+@using Syncfusion.Blazor.DropDowns
+@inject HttpClient HttpClient
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Dashboard</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Lorem ipsum</h1>
 
-Welcome to your new app.
+<SfAutoComplete TValue="string" TItem="StockSearchDTO" Placeholder="e.g. TSLA" DataSource="@Autocomplete" OnInput="@OnSearchModified" FilterType="FilterType.Contains">
+    <AutoCompleteFieldSettings Value="name"/>
+</SfAutoComplete>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+@code{
+    private string Search { get; set; }
+    
+    private List<StockSearchDTO> Autocomplete { get; set; }
+
+    private async Task OnSearchModified(ChangeEventArgs e)
+    {
+        Search = e.Value.ToString();
+        if(Search == "") return;
+        var response = await HttpClient.GetAsync($"https://api.polygon.io/v3/reference/tickers?search={Search}&active=true&apiKey=HGcdymSzKJINAJplybiYm7S6bVrcSe3a");
+        var result = await response.Content.ReadFromJsonAsync<StockSearchResultsDTO>();
+        Autocomplete = result.results;
+    }
+
+}
