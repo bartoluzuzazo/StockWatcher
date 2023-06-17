@@ -1,0 +1,28 @@
+﻿@page "/register"
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Buttons
+@inject NavigationManager NavigationManager
+
+<h3>Register</h3>
+
+<div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+    <SfTextBox Placeholder="Username"/>
+</div>
+<div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+    <SfTextBox Placeholder="Password" Type="InputType.Password"/>
+</div>
+<div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+    <SfTextBox Placeholder="Confirm Password" Type="InputType.Password"/>
+</div>
+<div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+    <div class="col-xs-12 col-sm-12 col-lg-6 col-md-6">
+        <SfButton IsPrimary="true" CssClass="e-outline">Register</SfButton>
+    </div>
+    <div class="col-xs-12 col-sm-12 col-lg-6 col-md-6">
+        <SfButton CssClass="e-flat" IsPrimary="true">Go Back</SfButton>
+    </div>
+</div>
+
+@code {
+    
+}

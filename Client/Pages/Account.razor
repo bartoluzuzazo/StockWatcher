@@ -1,0 +1,75 @@
+﻿@page "/account"
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Buttons
+@using Proj_APBD.Shared.Models.DTOs
+@using System.Net.Http.Headers
+@inject IJSRuntime Js
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+
+<h3>Account</h3>
+
+<div>
+    <div>Account settings</div>
+    <div>Name</div>
+    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+        <SfTextBox Placeholder="Username" Value="@Username" OnInput="(e) => Username = e.Value.ToString()"/>
+    </div>
+    <div>User Id</div>
+    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+        <div>@Id</div>
+    </div>
+    <div>Role</div>
+    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+        <div>@Role</div>
+    </div>
+    <div>Change Password</div>
+    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+        <SfTextBox Placeholder="Current Password" Type="InputType.Password" OnInput="(e) => CurrentPassword = e.Value.ToString()"/>
+    </div>
+    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+        <SfTextBox Placeholder="New Password" Type="InputType.Password" OnInput="(e) => NewPassword = e.Value.ToString()"/>
+    </div>
+    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+        <SfTextBox Placeholder="Repeat New Password" Type="InputType.Password" OnInput="(e) => RepeatNewPassword = e.Value.ToString()"/>
+    </div>
+    <div class="col-xs-12 col-sm-12 col-lg-6 col-md-6">
+        <SfButton CssClass="e-danger" @onclick="@Logout">Logout</SfButton>
+    </div>
+</div>
+
+@code {
+    private string Username { get; set; }
+    private string Id { get; set; }
+    private string Role { get; set; }
+
+    private string CurrentPassword { get; set; }
+    private string NewPassword { get; set; }
+    private string RepeatNewPassword { get; set; }
+    private string token { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        token = await Js.InvokeAsync<string>("localStorage.getItem", "jwt");
+        var message = new HttpRequestMessage(HttpMethod.Get, "api/Accounts/data");
+        message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var response = await HttpClient.SendAsync(message);
+        if (!response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/login");
+        }
+        var claims = await response.Content.ReadFromJsonAsync<List<ClaimDTO>>();
+
+        Username = claims!.First(c => c.Type == "Username").Value;
+        Id = claims!.First(c => c.Type == "UserId").Value;
+        Role = claims!.First(c => c.Type == "Role").Value;
+    }
+
+    public async Task Logout()
+    {
+        await Js.InvokeVoidAsync("localStorage.setItem", "jwt", "");
+        await Js.InvokeVoidAsync("localStorage.setItem", "ref", "");
+        NavigationManager.NavigateTo("/login");
+    }
+
+}
