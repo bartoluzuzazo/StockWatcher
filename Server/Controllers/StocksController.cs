@@ -5,7 +5,7 @@ using Proj_APBD.Server.Interfaces;
 namespace Proj_APBD.Server.Controllers;
 
 [Route("api/[controller]")]
-[Authorize]
+// [Authorize]
 public class StocksController : ControllerBase
 {
     private readonly IStockServices _stockServices;

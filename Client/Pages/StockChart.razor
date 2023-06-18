@@ -1,0 +1,92 @@
+﻿@using Syncfusion.Blazor.Charts
+@using Syncfusion.Blazor
+@inject NavigationManager NavigationManager
+@using System.Net.Http.Json
+@using Proj_APBD.Server.Models.DTOs
+@inject HttpClient Http
+@if (DataSource == null)
+{
+    <div class="stockchartloader"></div>
+}
+else
+{
+    <div class="@loadClass"></div>
+    <div class="@loadDiv">
+        <SfStockChart Title="@Ticker" Theme="@theme">
+            <StockChartEvents OnLoaded="@ChartLoaded"></StockChartEvents>
+            <StockChartPrimaryXAxis>
+                <StockChartAxisMajorGridLines Width="0"></StockChartAxisMajorGridLines>
+                <StockChartAxisCrosshairTooltip Enable="true"></StockChartAxisCrosshairTooltip>
+            </StockChartPrimaryXAxis>
+            <StockChartPrimaryYAxis>
+                <StockChartAxisLineStyle Width="0"></StockChartAxisLineStyle>
+                <StockChartAxisMajorTickLines Width="0"></StockChartAxisMajorTickLines>
+            </StockChartPrimaryYAxis>
+            <StockChartTooltipSettings Enable="true"></StockChartTooltipSettings>
+            <StockChartCrosshairSettings Enable="true"></StockChartCrosshairSettings>
+            <StockChartSeriesCollection>
+                <StockChartSeries DataSource="@DataSource" Type="ChartSeriesType.Candle"></StockChartSeries>
+            </StockChartSeriesCollection>
+            <StockChartChartArea>
+                <StockChartChartAreaBorder Width="0"></StockChartChartAreaBorder>
+            </StockChartChartArea>
+        </SfStockChart>
+    </div>
+    <style>
+        .stockchartloader {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #7a0fff;
+            width: 40px;
+            height: 40px;
+            position: absolute;
+            top: 46%;
+            left: 46%;
+            border-radius: 50%;
+            -webkit-animation: loader 2s linear infinite;
+            animation: loader 2s linear infinite;
+        }
+        .stockchartdiv {
+            visibility: hidden;
+        }
+    </style>
+}
+@code {
+    [Parameter]
+    public string Ticker { get; set; }
+    
+    public List<ChartSeriesType> nulldata = new List<ChartSeriesType>();
+    private ChartData[] DataSource;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await Http.GetFromJsonAsync<PolygonResponse>("api/Stocks?ticker=AAPL");
+        DataSource = response.results.Select(r => new ChartData()
+        {
+            date = DateTime.UnixEpoch.AddMilliseconds((double)r.t),
+            close = (double)r.c,
+            open = (double)r.o,
+            high = (double)r.h,
+            low = (double)r.l,
+            volume = (double)r.v
+        }).ToArray();
+    }
+    public class ChartData
+    {
+        public DateTime date { get; set; }
+        public double open { get; set; }
+        public double low { get; set; }
+        public double close { get; set; }
+        public double high { get; set; }
+        public double volume { get; set; }
+    }
+    string loadClass = "stockchartloader";
+    string loadDiv = "stockchartdiv";
+    void ChartLoaded(StockChartEventArgs args)
+    {
+        loadClass = "";
+        loadDiv = "";
+        StateHasChanged();
+    }
+    Theme theme = Theme.Bootstrap4;
+    
+}

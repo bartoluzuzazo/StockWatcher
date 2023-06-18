@@ -1,28 +1,74 @@
 ﻿@page "/"
 @using Proj_APBD.Client.Models.DTOs
 @using Syncfusion.Blazor.DropDowns
+@using Proj_APBD.Client.Models
 @inject HttpClient HttpClient
 
 <PageTitle>Dashboard</PageTitle>
 
 <h1>Lorem ipsum</h1>
 
-<SfAutoComplete TValue="string" TItem="StockSearchDTO" Placeholder="e.g. TSLA" DataSource="@Autocomplete" OnInput="@OnSearchModified" FilterType="FilterType.Contains">
-    <AutoCompleteFieldSettings Value="name"/>
+<SfAutoComplete TValue="string" TItem="StockSearchAutocompleteEntry" Placeholder="e.g. TSLA" DataSource="@Autocomplete" OnInput="@OnSearchModified" FilterType="FilterType.Contains">
+    <AutoCompleteTemplates TItem="StockSearchAutocompleteEntry">
+                      <HeaderTemplate>
+                          <table class="table-bordered" style="table-layout: fixed; width: 90%">
+                              <tr>
+                                  <th>Ticker</th>
+                                  <th>Name</th>
+                                  <th>Exchange</th>
+                                  <th>Type</th>
+                              </tr>
+                          </table>
+                     </HeaderTemplate>
+                     <ItemTemplate>
+                         <table class="" style="table-layout: fixed; width: 90%">
+                             <tbody>
+                             <tr @onclick="() => Selected = context">
+                                 <td>@context.Ticker</td>
+                                 <td>@context.Name</td>
+                                 <td>@context.Exchange</td>
+                                 <td>@context.Type</td>
+                             </tr>
+                             </tbody>
+                         </table>
+                     </ItemTemplate>
+                </AutoCompleteTemplates>
+           <AutoCompleteFieldSettings Value="Joined"></AutoCompleteFieldSettings>
 </SfAutoComplete>
 
+@if (Selected is not null)
+{
+    <StockChart Ticker="@Selected.Ticker"/>
+}
+
 @code{
+    private StockSearchAutocompleteEntry? Selected { get; set; }
+    
     private string Search { get; set; }
     
-    private List<StockSearchDTO> Autocomplete { get; set; }
+    private List<StockSearchAutocompleteEntry> Autocomplete { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Selected = null;
+    }
 
     private async Task OnSearchModified(ChangeEventArgs e)
     {
         Search = e.Value.ToString();
-        if(Search == "") return;
+        if (Search == "") return;
         var response = await HttpClient.GetAsync($"https://api.polygon.io/v3/reference/tickers?search={Search}&active=true&apiKey=HGcdymSzKJINAJplybiYm7S6bVrcSe3a");
         var result = await response.Content.ReadFromJsonAsync<StockSearchResultsDTO>();
-        Autocomplete = result.results;
+        Autocomplete = result.results.Select(r => new StockSearchAutocompleteEntry()
+        {
+            Ticker = r.ticker,
+            Name = r.name,
+            Type = r.market,
+            Exchange = r.primary_exchange,
+            Joined = $"{r.ticker} {r.name}"
+        }).ToList();
+        Console.WriteLine();
+        Autocomplete.ForEach(ev => Console.WriteLine(ev.Joined));
     }
 
 }

@@ -25,5 +25,9 @@
     <ProjectReference Include="..\Shared\Proj_APBD.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\DTOs" />
+  </ItemGroup>
+
 
 </Project>
