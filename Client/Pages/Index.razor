@@ -2,55 +2,93 @@
 @using Proj_APBD.Client.Models.DTOs
 @using Syncfusion.Blazor.DropDowns
 @using Proj_APBD.Client.Models
+@using Proj_APBD.Server.Models
+@using Proj_APBD.Server.Models.DTOs
+@using Syncfusion.Blazor.Notifications
+@using SkeletonType = Syncfusion.Blazor.Notifications.SkeletonType
+
 @inject HttpClient HttpClient
 
 <PageTitle>Dashboard</PageTitle>
 
-<h1>Lorem ipsum</h1>
+<h1>Dashboard</h1>
 
-<SfAutoComplete TValue="string" TItem="StockSearchAutocompleteEntry" Placeholder="e.g. TSLA" DataSource="@Autocomplete" OnInput="@OnSearchModified" FilterType="FilterType.Contains">
+<SfAutoComplete TValue="string" TItem="StockSearchAutocompleteEntry" Placeholder="e.g. TSLA" DataSource="@Autocomplete" OnInput="@OnSearchModified" FilterType="FilterType.Contains" MinLength="3">
     <AutoCompleteTemplates TItem="StockSearchAutocompleteEntry">
-                      <HeaderTemplate>
-                          <table class="table-bordered" style="table-layout: fixed; width: 90%">
-                              <tr>
-                                  <th>Ticker</th>
-                                  <th>Name</th>
-                                  <th>Exchange</th>
-                                  <th>Type</th>
-                              </tr>
-                          </table>
-                     </HeaderTemplate>
-                     <ItemTemplate>
-                         <table class="" style="table-layout: fixed; width: 90%">
-                             <tbody>
-                             <tr @onclick="() => Selected = context">
-                                 <td>@context.Ticker</td>
-                                 <td>@context.Name</td>
-                                 <td>@context.Exchange</td>
-                                 <td>@context.Type</td>
-                             </tr>
-                             </tbody>
-                         </table>
-                     </ItemTemplate>
-                </AutoCompleteTemplates>
-           <AutoCompleteFieldSettings Value="Joined"></AutoCompleteFieldSettings>
+        <HeaderTemplate>
+            <table class="table-bordered" style="table-layout: fixed; width: 90%">
+                <tr>
+                    <th>Ticker</th>
+                    <th>Name</th>
+                    <th>Exchange</th>
+                    <th>Type</th>
+                </tr>
+            </table>
+        </HeaderTemplate>
+        <ItemTemplate>
+            <table class="" style="table-layout: fixed; width: 90%">
+                <tbody>
+                <tr>
+                    <td>@context.Ticker</td>
+                    <td>@context.Name</td>
+                    <td>@context.Exchange</td>
+                    <td>@context.Type</td>
+                </tr>
+                </tbody>
+            </table>
+        </ItemTemplate>
+    </AutoCompleteTemplates>
+    <AutoCompleteEvents TItem="StockSearchAutocompleteEntry" TValue="string" OnValueSelect="(e) => OnStockSelected(e.ItemData)"></AutoCompleteEvents>
+    <AutoCompleteFieldSettings Value="Joined"/>
 </SfAutoComplete>
 
 @if (Selected is not null)
 {
-    <StockChart Ticker="@Selected.Ticker"/>
+    @if (DataSource is not null)
+    {
+        <StockChart Ticker="@Selected.Ticker" DataSource="@DataSource"/>
+    }
+    else
+    {
+        <SfSkeleton CssClass="skeletonRectangle" Shape=SkeletonType.Rectangle Width="100%" Height="50px"></SfSkeleton>
+        <SfSkeleton CssClass="skeletonRectangle" Shape=SkeletonType.Rectangle Width="100%" Height="50px"></SfSkeleton>
+        <SfSkeleton CssClass="skeletonRectangle" Shape=SkeletonType.Rectangle Width="100%" Height="100px"></SfSkeleton>
+        <SfSkeleton CssClass="skeletonRectangle" Shape=SkeletonType.Rectangle Width="100%" Height="70px"></SfSkeleton>
+        <SfSkeleton CssClass="skeletonRectangle" Shape=SkeletonType.Rectangle Width="100%" Height="30px"></SfSkeleton>
+    }
 }
 
 @code{
     private StockSearchAutocompleteEntry? Selected { get; set; }
-    
+    private List<StockChartData>? DataSource { get; set; }
+
     private string Search { get; set; }
-    
+
     private List<StockSearchAutocompleteEntry> Autocomplete { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    private async Task OnStockSelected(StockSearchAutocompleteEntry newStock)
     {
-        Selected = null;
+        Selected = newStock;
+        DataSource = null;
+        var response = await HttpClient.GetFromJsonAsync<PolygonResponse>($"api/Stocks?ticker={newStock.Ticker}");
+        DataSource = response.results.Select(r => new StockChartData()
+        {
+            date = DateTime.UnixEpoch.AddMilliseconds((double)r.t),
+            close = (double)r.c,
+            open = (double)r.o,
+            high = (double)r.h,
+            low = (double)r.l,
+            volume = (double)r.v
+        }).ToList();
+    }
+
+    private async Task Enter(KeyboardEventArgs e, StockSearchAutocompleteEntry context)
+    {
+        Console.WriteLine("dupa");
+        if (e.Code is "Enter" or "NumpadEnter")
+        {
+            await OnStockSelected(context);
+        }
     }
 
     private async Task OnSearchModified(ChangeEventArgs e)
@@ -67,8 +105,7 @@
             Exchange = r.primary_exchange,
             Joined = $"{r.ticker} {r.name}"
         }).ToList();
-        Console.WriteLine();
-        Autocomplete.ForEach(ev => Console.WriteLine(ev.Joined));
     }
 
+    
 }
