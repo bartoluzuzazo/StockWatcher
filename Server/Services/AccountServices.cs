@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Proj_APBD.Server.Contexts;
 using Proj_APBD.Server.Interfaces;
 using Proj_APBD.Server.Models;
+using Proj_APBD.Shared.Models.DTOs;
 
 namespace Proj_APBD.Server.Services;
 
@@ -116,5 +117,11 @@ public class AccountServices : IAccountServices
         var users = await _context.Users.ToListAsync();
         var user = users.Find(u => string.Equals(u.Username, username, StringComparison.CurrentCultureIgnoreCase));
         return user is not null;
+    }
+
+    public async Task<User?> GetUserAsync(ClaimsPrincipal user)
+    {
+        var username = user.Claims.Select(c => new ClaimDTO(){Type = c.Type, Value = c.Value}).ToList().FirstOrDefault(c => c.Type == "Username")!.Value;
+        return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
     }
 }

@@ -1,0 +1,19 @@
+﻿@using Syncfusion.Blazor.Layouts
+@using Proj_APBD.Client.Models
+
+
+<h3>Watchlist</h3>
+
+<SfDashboardLayout Columns="4" AllowDragging="true">
+    <DashboardLayoutPanels >
+        @foreach (var stock in WatchedStocks)
+        {
+            <WatchlistItem Stock="@stock"/>
+        }
+    </DashboardLayoutPanels>
+</SfDashboardLayout>
+
+@code {
+    [Parameter]
+    public List<WatchlistStock> WatchedStocks { get; set; }
+}

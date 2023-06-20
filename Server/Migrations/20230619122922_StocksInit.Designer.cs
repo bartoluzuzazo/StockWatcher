@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Proj_APBD.Server.Contexts;
 
@@ -11,9 +12,11 @@ using Proj_APBD.Server.Contexts;
 namespace Proj_APBD.Server.Migrations
 {
     [DbContext(typeof(Context))]
-    partial class ContextModelSnapshot : ModelSnapshot
+    [Migration("20230619122922_StocksInit")]
+    partial class StocksInit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25,8 +28,8 @@ namespace Proj_APBD.Server.Migrations
             modelBuilder.Entity("Proj_APBD.Server.Models.Stock", b =>
                 {
                     b.Property<string>("Ticker")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasMaxLength(5)
+                        .HasColumnType("nvarchar(5)");
 
                     b.HasKey("Ticker");
 
@@ -56,54 +59,40 @@ namespace Proj_APBD.Server.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("3b3ebc7d-fa9a-4f1a-aea2-0e022aefddeb"),
+                            Id = new Guid("489e4c7c-004b-4b6c-9488-6b37f5e18c1f"),
                             Password = "AQAAAAIAAYagAAAAEEJO4LuCMB1w3MPT/+ZpuSIsBse2HRuBfi01fS3Wnk9dlahVlaPT52diyojD3QsN7g==",
                             Username = "Admin"
                         });
                 });
 
-            modelBuilder.Entity("Proj_APBD.Server.Models.UserStock", b =>
+            modelBuilder.Entity("StockUser", b =>
                 {
-                    b.Property<Guid>("UserId")
+                    b.Property<string>("StocksTicker")
+                        .HasColumnType("nvarchar(5)");
+
+                    b.Property<Guid>("UsersId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("StockTicker")
-                        .HasColumnType("nvarchar(10)");
+                    b.HasKey("StocksTicker", "UsersId");
 
-                    b.HasKey("UserId", "StockTicker");
+                    b.HasIndex("UsersId");
 
-                    b.HasIndex("StockTicker");
-
-                    b.ToTable("User_Stock");
+                    b.ToTable("StockUser");
                 });
 
-            modelBuilder.Entity("Proj_APBD.Server.Models.UserStock", b =>
+            modelBuilder.Entity("StockUser", b =>
                 {
-                    b.HasOne("Proj_APBD.Server.Models.Stock", "Stock")
-                        .WithMany("UserStocks")
-                        .HasForeignKey("StockTicker")
+                    b.HasOne("Proj_APBD.Server.Models.Stock", null)
+                        .WithMany()
+                        .HasForeignKey("StocksTicker")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Proj_APBD.Server.Models.User", "User")
-                        .WithMany("UserStocks")
-                        .HasForeignKey("UserId")
+                    b.HasOne("Proj_APBD.Server.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Stock");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Proj_APBD.Server.Models.Stock", b =>
-                {
-                    b.Navigation("UserStocks");
-                });
-
-            modelBuilder.Entity("Proj_APBD.Server.Models.User", b =>
-                {
-                    b.Navigation("UserStocks");
                 });
 #pragma warning restore 612, 618
         }

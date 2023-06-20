@@ -1,17 +1,57 @@
-﻿@inherits LayoutComponentBase
+﻿@using System.Net.Http.Headers
+@using Proj_APBD.Shared.Models.DTOs
+@using Proj_APBD.Client.Models
+@inherits LayoutComponentBase
+@inject IJSRuntime Js
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+@inject UserData UserData
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+@if (LoggedIn)
+{
+    <div class="page">
+        <div class="sidebar">
+            <NavMenu />
         </div>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+        <main>
+            <article class="content px-4">
+                @Body
+            </article>
+        </main>
+    </div>
+}
+else
+{
+    @Body
+}
+@code{
+
+    private bool LoggedIn { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await Js.InvokeAsync<string>("localStorage.getItem", "jwt");
+        if (token == "")
+        {
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+        var message = new HttpRequestMessage(HttpMethod.Get, "api/Accounts/data");
+        message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var response = await HttpClient.SendAsync(message);
+        if (!response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+        var claims = await response.Content.ReadFromJsonAsync<List<ClaimDTO>>();
+
+        UserData.Token = token;
+        UserData.Id = claims!.First(c => c.Type == "UserId").Value;
+        UserData.Username = claims!.First(c => c.Type == "Username").Value;
+        UserData.Role = claims!.First(c => c.Type == "Role").Value;
+        LoggedIn = true;
+    }
+
+}

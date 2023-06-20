@@ -15,5 +15,5 @@ public class User
     [Required, MaxLength(300)]
     public string Password { get; set; } = null!;
 
-    // public virtual ICollection<Stock> Stocks { get; set; } = null!;
+    public virtual ICollection<UserStock> UserStocks { get; set; }  = null!;
 }

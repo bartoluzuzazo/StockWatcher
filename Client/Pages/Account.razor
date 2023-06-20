@@ -3,41 +3,72 @@
 @using Syncfusion.Blazor.Buttons
 @using Proj_APBD.Shared.Models.DTOs
 @using System.Net.Http.Headers
+@using Proj_APBD.Client.Models
+@using Proj_APBD.Client.Models.DTOs
+@using Syncfusion.Blazor.Layouts
 @inject IJSRuntime Js
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
+@inject UserData UserData
 
 <h3>Account</h3>
 
-<div>
-    <div>Account settings</div>
-    <div>Name</div>
-    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
-        <SfTextBox Placeholder="Username" Value="@Username" OnInput="(e) => Username = e.Value.ToString()"/>
-    </div>
-    <div>User Id</div>
-    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
-        <div>@Id</div>
-    </div>
-    <div>Role</div>
-    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
-        <div>@Role</div>
-    </div>
-    <div>Change Password</div>
-    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
-        <SfTextBox Placeholder="Current Password" Type="InputType.Password" OnInput="(e) => CurrentPassword = e.Value.ToString()"/>
-    </div>
-    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
-        <SfTextBox Placeholder="New Password" Type="InputType.Password" OnInput="(e) => NewPassword = e.Value.ToString()"/>
-    </div>
-    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
-        <SfTextBox Placeholder="Repeat New Password" Type="InputType.Password" OnInput="(e) => RepeatNewPassword = e.Value.ToString()"/>
-    </div>
-    <div class="col-xs-12 col-sm-12 col-lg-6 col-md-6">
-        <SfButton CssClass="e-danger" @onclick="@Logout">Logout</SfButton>
-    </div>
+<div style="width: 50%;">
+    <SfDashboardLayout Columns="2" AllowDragging="false">
+        <DashboardLayoutPanels >
+            <DashboardLayoutPanel Column="0" Row="0">
+                <HeaderTemplate>
+                    <div>Account settings</div>
+                </HeaderTemplate>
+                <ContentTemplate>
+                    <div>
+                        <div>Name</div>
+                        <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+                            <SfTextBox Placeholder="Username" Value="@Username" OnInput="(e) => Username = e.Value.ToString()"/>
+                        </div>
+                        <div>User Id</div>
+                        <div>
+                            <div>@Id</div>
+                        </div>
+                        <div>Role</div>
+                        <div >
+                            <div>@Role</div>
+                        </div>
+                        <div>
+                            <SfButton CssClass="e-danger" @onclick="@Logout">Logout</SfButton>
+                        </div>
+                    </div>
+                </ContentTemplate>
+            </DashboardLayoutPanel>
+            <DashboardLayoutPanel Column="1" Row="0">
+                <HeaderTemplate>
+                    <div>Change Password</div>
+                </HeaderTemplate>
+                <ContentTemplate>
+                    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+                        <SfTextBox Placeholder="Current Password" Type="InputType.Password" OnInput="(e) => CurrentPassword = e.Value.ToString()"/>
+                    </div>
+                    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+                        <SfTextBox Placeholder="New Password" Type="InputType.Password" OnInput="(e) => NewPassword = e.Value.ToString()"/>
+                    </div>
+                    <div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
+                        <SfTextBox Placeholder="Repeat New Password" Type="InputType.Password" OnInput="(e) => RepeatNewPassword = e.Value.ToString()"/>
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-lg-6 col-md-6">
+                        <SfButton CssClass="e-danger" @onclick="@Logout">Submit</SfButton>
+                    </div>
+                </ContentTemplate>
+            </DashboardLayoutPanel>
+        </DashboardLayoutPanels>
+    </SfDashboardLayout>
 </div>
 
+@if (Watched is not null)
+{
+    <div>
+        <Watchlist WatchedStocks="Watched"/>
+    </div>
+}
 @code {
     private string Username { get; set; }
     private string Id { get; set; }
@@ -46,29 +77,36 @@
     private string CurrentPassword { get; set; }
     private string NewPassword { get; set; }
     private string RepeatNewPassword { get; set; }
-    private string token { get; set; }
+    
+    private List<WatchlistStock>? Watched { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        token = await Js.InvokeAsync<string>("localStorage.getItem", "jwt");
-        if (token == "")
-        {
-            NavigationManager.NavigateTo("/login");
-            return;
-        }
-        var message = new HttpRequestMessage(HttpMethod.Get, "api/Accounts/data");
-        message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        Username = UserData.Username;
+        Id = UserData.Id;
+        Role = UserData.Role;
+        
+        var message = new HttpRequestMessage(HttpMethod.Get, $"api/Stocks/watched");
+        message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", UserData.Token);
         var response = await HttpClient.SendAsync(message);
-        if (!response.IsSuccessStatusCode)
+        var watched = await response.Content.ReadFromJsonAsync<List<string>>();
+        watched.ForEach(Console.WriteLine);
+        Watched = new List<WatchlistStock>();
+        foreach (var ticker in watched)
         {
-            NavigationManager.NavigateTo("/login");
-            return;
+            var dto = await HttpClient.GetFromJsonAsync<PolygonTickerDetailsDTO>($"https://api.polygon.io/v3/reference/tickers/{ticker}?apiKey=HGcdymSzKJINAJplybiYm7S6bVrcSe3a");
+            var stock = dto.results;
+            Watched.Add(new ()
+            {
+                Ticker = stock.ticker,
+                Name = stock.name,
+                Country = stock.locale,
+                LogoUrl = stock.branding.icon_url + "?apiKey=HGcdymSzKJINAJplybiYm7S6bVrcSe3a",
+                Sector = stock.sic_description
+            });
         }
-        var claims = await response.Content.ReadFromJsonAsync<List<ClaimDTO>>();
+        
 
-        Username = claims!.First(c => c.Type == "Username").Value;
-        Id = claims!.First(c => c.Type == "UserId").Value;
-        Role = claims!.First(c => c.Type == "Role").Value;
     }
 
     private async Task Logout()

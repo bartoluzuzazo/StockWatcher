@@ -40,7 +40,7 @@
         label = response.StatusCode.ToString();
         await Js.InvokeVoidAsync("localStorage.setItem", "jwt", tokens.Token);
         await Js.InvokeVoidAsync("localStorage.setItem", "ref", tokens.Ref);
-        NavigationManager.NavigateTo("/account");
+        NavigationManager.NavigateTo("", true, true);
     }
 
     private void OnRegister()
