@@ -68,7 +68,6 @@ public class StockServices : IStockServices
             };
             await _context.Stocks.AddAsync(stock);
         }
-
         return stock;
     }
 

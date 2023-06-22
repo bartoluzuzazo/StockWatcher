@@ -1,0 +1,34 @@
+﻿@using Syncfusion.Blazor.SplitButtons
+@inject NavigationManager NavigationManager
+@inject IJSRuntime Js
+
+<div class="nav-1">
+    <div class="menu">
+        <SfDropDownButton Content="Profile" IconCss="e-ddb-icons e-profile">
+            <DropDownButtonEvents ItemSelected="OnItemSelected" />
+            <DropDownMenuItems>
+                <DropDownMenuItem Id="dashboard" Text="Dashboard" Url="" IconCss="e-ddb-icons e-dashboard"/>
+                <DropDownMenuItem Id="watchlist" Text="Watchlist" Url="watchlist" IconCss="e-ddb-icons e-notifications"/>
+                <DropDownMenuItem Id="settings" Text="User Settings" Url="account" IconCss="e-ddb-icons e-settings"/>
+                <DropDownMenuItem Id="logout" Text="Log Out" Url="login" IconCss="e-ddb-icons e-logout"/>
+            </DropDownMenuItems>
+        </SfDropDownButton>
+    </div>
+</div>
+
+@code {
+
+    private async Task OnItemSelected(MenuEventArgs e)
+    {
+        if (e.Item.Id == "logout") await Logout();
+        NavigationManager.NavigateTo(e.Item.Url, false, true);
+    }
+
+    private async Task Logout()
+    {
+        await Js.InvokeVoidAsync("localStorage.setItem", "jwt", "");
+        await Js.InvokeVoidAsync("localStorage.setItem", "ref", "");
+    }
+    
+    
+}

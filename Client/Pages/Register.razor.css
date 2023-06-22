@@ -1,0 +1,23 @@
+﻿.center{
+    height: 95vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.field{
+    width: 20vw;
+    padding: 1vh 0;
+}
+
+.buttons{
+    width: 20vw;
+    display: flex;
+    flex-direction: row-reverse;
+    padding: 1vh 0;
+}
+
+.button{
+    padding: 0 0 0 1vw;
+}

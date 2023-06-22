@@ -1,6 +1,6 @@
 ﻿namespace Proj_APBD.Client.Models;
 
-public class WatchlistStock
+public class StockData
 {
     public string Ticker { get; set; }
     public string LogoUrl { get; set; }

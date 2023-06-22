@@ -1,19 +1,42 @@
-﻿@using Syncfusion.Blazor.Layouts
+﻿@page "/watchlist"
 @using Proj_APBD.Client.Models
-
-
+@using Proj_APBD.Client.Models.DTOs
+@using System.Net.Http.Headers
+@inject HttpClient HttpClient
+@inject UserData UserData
 <h3>Watchlist</h3>
 
-<SfDashboardLayout Columns="4" AllowDragging="true">
-    <DashboardLayoutPanels >
-        @foreach (var stock in WatchedStocks)
-        {
-            <WatchlistItem Stock="@stock"/>
-        }
-    </DashboardLayoutPanels>
-</SfDashboardLayout>
+@if (Watched is not null)
+{
+    <div>
+        <WatchlistTable WatchedStocks="@Watched"/>
+    </div>
+}
 
 @code {
-    [Parameter]
-    public List<WatchlistStock> WatchedStocks { get; set; }
+    private List<StockData>? Watched { get; set; }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        var message = new HttpRequestMessage(HttpMethod.Get, "api/Stocks/watched");
+        message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", UserData.Token);
+        var response = await HttpClient.SendAsync(message);
+        var watched = await response.Content.ReadFromJsonAsync<List<string>>();
+        watched.ForEach(Console.WriteLine);
+        Watched = new List<StockData>();
+        foreach (var ticker in watched)
+        {
+            var dto = await HttpClient.GetFromJsonAsync<PolygonTickerDetailsDTO>($"https://api.polygon.io/v3/reference/tickers/{ticker}?apiKey=HGcdymSzKJINAJplybiYm7S6bVrcSe3a");
+            var stock = dto.results;
+            Watched.Add(new ()
+            {
+                Ticker = stock.ticker,
+                Name = stock.name,
+                Country = stock.locale,
+                LogoUrl = stock.branding.icon_url + "?apiKey=HGcdymSzKJINAJplybiYm7S6bVrcSe3a",
+                Sector = stock.sic_description
+            });
+        }
+    }
+
 }

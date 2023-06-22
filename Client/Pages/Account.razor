@@ -63,12 +63,7 @@
     </SfDashboardLayout>
 </div>
 
-@if (Watched is not null)
-{
-    <div>
-        <Watchlist WatchedStocks="Watched"/>
-    </div>
-}
+
 @code {
     private string Username { get; set; }
     private string Id { get; set; }
@@ -78,35 +73,12 @@
     private string NewPassword { get; set; }
     private string RepeatNewPassword { get; set; }
     
-    private List<WatchlistStock>? Watched { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         Username = UserData.Username;
         Id = UserData.Id;
         Role = UserData.Role;
-        
-        var message = new HttpRequestMessage(HttpMethod.Get, $"api/Stocks/watched");
-        message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", UserData.Token);
-        var response = await HttpClient.SendAsync(message);
-        var watched = await response.Content.ReadFromJsonAsync<List<string>>();
-        watched.ForEach(Console.WriteLine);
-        Watched = new List<WatchlistStock>();
-        foreach (var ticker in watched)
-        {
-            var dto = await HttpClient.GetFromJsonAsync<PolygonTickerDetailsDTO>($"https://api.polygon.io/v3/reference/tickers/{ticker}?apiKey=HGcdymSzKJINAJplybiYm7S6bVrcSe3a");
-            var stock = dto.results;
-            Watched.Add(new ()
-            {
-                Ticker = stock.ticker,
-                Name = stock.name,
-                Country = stock.locale,
-                LogoUrl = stock.branding.icon_url + "?apiKey=HGcdymSzKJINAJplybiYm7S6bVrcSe3a",
-                Sector = stock.sic_description
-            });
-        }
-        
-
     }
 
     private async Task Logout()

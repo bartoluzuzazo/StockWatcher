@@ -7,24 +7,17 @@
 @inject HttpClient HttpClient
 @inject UserData UserData
 
-@if (LoggedIn)
-{
-    <div class="page">
-        <div class="sidebar">
-            <NavMenu />
-        </div>
+<div>
+    
+    <Nav/>
 
-        <main>
-            <article class="content px-4">
-                @Body
-            </article>
-        </main>
-    </div>
-}
-else
-{
-    @Body
-}
+    <main>
+        <article class="">
+            @Body
+        </article>
+    </main>
+</div>
+
 @code{
 
     private bool LoggedIn { get; set; }

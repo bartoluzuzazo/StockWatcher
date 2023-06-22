@@ -11,72 +11,92 @@
 @inject UserData UserData
 
 <PageTitle>Dashboard</PageTitle>
+<div class="headline">
+    <h1>Dashboard</h1>
+</div>
 
-<h1>Dashboard</h1>
+<div class="search">
+    <SfAutoComplete TValue="string" TItem="StockSearchAutocompleteEntry" Placeholder="e.g. TSLA" DataSource="@Autocomplete" OnInput="@OnSearchModified" FilterType="FilterType.Contains" MinLength="2">
+        <AutoCompleteTemplates TItem="StockSearchAutocompleteEntry">
+            <HeaderTemplate>
+                <table class="table-bordered autocomplete">
+                    <tr>
+                        <th>Ticker</th>
+                        <th>Name</th>
+                        <th>Exchange</th>
+                        <th>Type</th>
+                    </tr>
+                </table>
+            </HeaderTemplate>
+            <ItemTemplate>
+                <table class="autocomplete">
+                    <tbody>
+                    <tr>
+                        <td>@context.Ticker</td>
+                        <td class="stockname">@context.Name</td>
+                        <td>@context.Exchange</td>
+                        <td>@context.Type</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </ItemTemplate>
+            <NoRecordsTemplate>
+                @if (Loading)
+                {
+                    <SfSkeleton CssClass="skeletonText" Shape=SkeletonType.Text Width="100%" Height="15px"/>
+                    <SfSkeleton CssClass="skeletonText" Shape=SkeletonType.Text Width="100%" Height="15px"/>
+                    <SfSkeleton CssClass="skeletonText" Shape=SkeletonType.Text Width="100%" Height="15px"/>
+                }
+                else
+                {
+                    <div>No matching records found.</div>
+                }
+            </NoRecordsTemplate>
+        </AutoCompleteTemplates>
+        <AutoCompleteEvents TItem="StockSearchAutocompleteEntry" TValue="string" OnValueSelect="(e) => OnStockSelected(e.ItemData)"/>
+        <AutoCompleteFieldSettings Value="Joined"/>
+    </SfAutoComplete>
+</div>
 
-<SfAutoComplete TValue="string" TItem="StockSearchAutocompleteEntry" Placeholder="e.g. TSLA" DataSource="@Autocomplete" OnInput="@OnSearchModified" FilterType="FilterType.Contains" MinLength="3">
-    <AutoCompleteTemplates TItem="StockSearchAutocompleteEntry">
-        <HeaderTemplate>
-            <table class="table-bordered" style="table-layout: fixed; width: 90%">
-                <tr>
-                    <th>Ticker</th>
-                    <th>Name</th>
-                    <th>Exchange</th>
-                    <th>Type</th>
-                </tr>
-            </table>
-        </HeaderTemplate>
-        <ItemTemplate>
-            <table class="" style="table-layout: fixed; width: 90%">
-                <tbody>
-                <tr>
-                    <td>@context.Ticker</td>
-                    <td>@context.Name</td>
-                    <td>@context.Exchange</td>
-                    <td>@context.Type</td>
-                </tr>
-                </tbody>
-            </table>
-        </ItemTemplate>
-        <NoRecordsTemplate>
-            @if (Loading)
-            {
-                <SfSkeleton CssClass="skeletonText" Shape=SkeletonType.Text Width="100%" Height="15px"></SfSkeleton>
-                <SfSkeleton CssClass="skeletonText" Shape=SkeletonType.Text Width="100%" Height="15px"></SfSkeleton>
-                <SfSkeleton CssClass="skeletonText" Shape=SkeletonType.Text Width="100%" Height="15px"></SfSkeleton>
-            }
-            else
-            {
-                <div>No matching records found.</div>
-            }
-        </NoRecordsTemplate>
-    </AutoCompleteTemplates>
-    <AutoCompleteEvents TItem="StockSearchAutocompleteEntry" TValue="string" OnValueSelect="(e) => OnStockSelected(e.ItemData)"></AutoCompleteEvents>
-    <AutoCompleteFieldSettings Value="Joined"/>
-</SfAutoComplete>
 
 @if (Selected is not null)
 {
-    if (DataSource is not null)
+    if (CurrentStock is not null)
     {
-        <StockChart Ticker="@Selected.Ticker" DataSource="@DataSource"/>
+        <div class="stockdata">
+            <StockDataPanel Stock="CurrentStock"/>
+        </div>
     }
     else
     {
-        <SfSkeleton CssClass="skeletonRectangle" Shape=SkeletonType.Rectangle Width="100%" Height="50px"></SfSkeleton>
-        <SfSkeleton CssClass="skeletonRectangle" Shape=SkeletonType.Rectangle Width="100%" Height="50px"></SfSkeleton>
-        <SfSkeleton CssClass="skeletonRectangle" Shape=SkeletonType.Rectangle Width="100%" Height="100px"></SfSkeleton>
-        <SfSkeleton CssClass="skeletonRectangle" Shape=SkeletonType.Rectangle Width="100%" Height="70px"></SfSkeleton>
-        <SfSkeleton CssClass="skeletonRectangle" Shape=SkeletonType.Rectangle Width="100%" Height="30px"></SfSkeleton>
+        <SfSkeleton CssClass="skeletonRectangle" Shape=SkeletonType.Rectangle Width="100%" Height="20vh"></SfSkeleton>
+    }
+    
+    if (DataSource is not null)
+    {
+        <div class="chart">
+            <StockChart Ticker="@Selected.Ticker" DataSource="@DataSource"/>
+        </div>
+    }
+    else
+    {
+        <div class="chart">
+            <SfSkeleton CssClass="skeletonRectangle" Shape=SkeletonType.Rectangle Width="100%" Height="50px"></SfSkeleton>
+            <SfSkeleton CssClass="skeletonRectangle" Shape=SkeletonType.Rectangle Width="100%" Height="50px"></SfSkeleton>
+            <SfSkeleton CssClass="skeletonRectangle" Shape=SkeletonType.Rectangle Width="100%" Height="100px"></SfSkeleton>
+            <SfSkeleton CssClass="skeletonRectangle" Shape=SkeletonType.Rectangle Width="100%" Height="70px"></SfSkeleton>
+            <SfSkeleton CssClass="skeletonRectangle" Shape=SkeletonType.Rectangle Width="100%" Height="30px"></SfSkeleton>
+        </div>
     }
 }
 
 @code{
     private StockSearchAutocompleteEntry? Selected { get; set; }
     private List<StockChartData>? DataSource { get; set; }
+    private StockData? CurrentStock { get; set; }
 
     private string Search { get; set; }
-    
+
     private bool Loading { get; set; }
 
     private List<StockSearchAutocompleteEntry> Autocomplete { get; set; }
@@ -84,29 +104,20 @@
     private async Task OnStockSelected(StockSearchAutocompleteEntry newStock)
     {
         Selected = newStock;
+        CurrentStock = null;
         DataSource = null;
-        var message = new HttpRequestMessage(HttpMethod.Get, $"api/Stocks?ticker={newStock.Ticker}");
-        message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", UserData.Token);
-        var response = await HttpClient.SendAsync(message);
-        var stockData = await response.Content.ReadFromJsonAsync<PolygonResponse>();
-        
-        DataSource = stockData.results.Select(r => new StockChartData()
-        {
-            date = DateTime.UnixEpoch.AddMilliseconds((double)r.t),
-            close = (double)r.c,
-            open = (double)r.o,
-            high = (double)r.h,
-            low = (double)r.l,
-            volume = (double)r.v
-        }).ToList();
+
+        await GetStockInfo(newStock.Ticker);
+
+        await GetStockChart();
     }
 
     private async Task OnSearchModified(ChangeEventArgs e)
     {
+        if (e.Value.ToString().Length != 2 || e.Value.ToString() == Search) return;
         Search = e.Value.ToString();
-        if (Search.Length < 3) return;
         Loading = true;
-        var response = await HttpClient.GetAsync($"https://api.polygon.io/v3/reference/tickers?search={Search}&active=true&limit=10&market=stocks&apiKey=HGcdymSzKJINAJplybiYm7S6bVrcSe3a");
+        var response = await HttpClient.GetAsync($"https://api.polygon.io/v3/reference/tickers?search={Search}&active=true&limit=1000&market=stocks&apiKey=HGcdymSzKJINAJplybiYm7S6bVrcSe3a");
         if (!response.IsSuccessStatusCode)
         {
             Loading = false;
@@ -124,5 +135,36 @@
         Loading = false;
     }
 
-    
+    private async Task GetStockInfo(string ticker)
+    {
+        var dto = await HttpClient.GetFromJsonAsync<PolygonTickerDetailsDTO>($"https://api.polygon.io/v3/reference/tickers/{ticker}?apiKey=HGcdymSzKJINAJplybiYm7S6bVrcSe3a");
+        var stock = dto.results;
+        CurrentStock = new StockData()
+        {
+            Ticker = stock.ticker,
+            Name = stock.name,
+            Country = stock.locale.ToUpper(),
+            LogoUrl = stock.branding.icon_url + "?apiKey=HGcdymSzKJINAJplybiYm7S6bVrcSe3a",
+            Sector = stock.sic_description
+        };
+    }
+
+    private async Task GetStockChart()
+    {
+        var message = new HttpRequestMessage(HttpMethod.Get, $"api/Stocks?ticker={Selected.Ticker}");
+        message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", UserData.Token);
+        var response = await HttpClient.SendAsync(message);
+        var stockData = await response.Content.ReadFromJsonAsync<PolygonResponse>();
+
+        DataSource = stockData.results.Select(r => new StockChartData()
+        {
+            date = DateTime.UnixEpoch.AddMilliseconds((double)r.t),
+            close = (double)r.c,
+            open = (double)r.o,
+            high = (double)r.h,
+            low = (double)r.l,
+            volume = (double)r.v
+        }).ToList();
+    }
+
 }

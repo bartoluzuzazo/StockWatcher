@@ -1,0 +1,33 @@
+﻿.sdp-layout{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    padding: 1vh 1vw;
+}
+.sdp-pic{
+    height: 100%;
+    width: 20%;
+}
+.sdp-text{
+    height: 100%;
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.sdp-name{
+    height: 40%;
+}
+.sdp-details{
+    height: 60%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-around;
+}
+.pad-t{
+    padding: 5px;
+}

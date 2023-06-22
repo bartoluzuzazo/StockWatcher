@@ -5,30 +5,28 @@
 @inject NavigationManager NavigationManager
 @inject HttpClient HttpClient
 @inject IJSRuntime Js
-<h3>Login</h3>
 
-<div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
-    <SfTextBox Placeholder="Username" OnInput="(e) => Username = e.Value.ToString()"/>
-</div>
-<div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
-    <SfTextBox Placeholder="Password" Type="InputType.Password" OnInput="(e) => Password = e.Value.ToString()"/>
-</div>
-<div class="col-xs-6 col-sm-6 col-lg-6 col-md-6">
-    <div class="col-xs-12 col-sm-12 col-lg-6 col-md-6">
-        <SfButton IsPrimary="true" CssClass="e-outline" @onclick="@OnLogin">Login</SfButton>
+<div class="center">
+    <h3>Login</h3>
+    <div class="field col-xs-6 col-sm-6 col-lg-6 col-md-6">
+        <SfTextBox Placeholder="Username" OnInput="(e) => Username = e.Value.ToString()"/>
     </div>
-    <div class="col-xs-12 col-sm-12 col-lg-6 col-md-6">
-        <SfButton CssClass="e-flat" IsPrimary="true" @onclick="@OnRegister">Register</SfButton>
+    <div class="field col-xs-6 col-sm-6 col-lg-6 col-md-6">
+        <SfTextBox Placeholder="Password" Type="InputType.Password" OnInput="(e) => Password = e.Value.ToString()"/>
     </div>
-    <div>
-        @label
+    
+    <div class="buttons">
+        <div class="button">
+            <SfButton IsPrimary="true" CssClass="e-outline" @onclick="@OnLogin">Login</SfButton>
+        </div>
+        <div class="button">
+            <SfButton CssClass="e-flat" IsPrimary="true" @onclick="@OnRegister">Register</SfButton>
+        </div>
     </div>
 </div>
-
 
 
 @code {
-    private string label { get; set; }
     private string Username { get; set; }
     private string Password { get; set; }
 
@@ -37,7 +35,6 @@
         var dto = new UserDTO() { Username = Username, Password = Password };
         var response = await HttpClient.PostAsJsonAsync("api/Accounts/login", dto);
         var tokens = await response.Content.ReadFromJsonAsync<JwtDTO>();
-        label = response.StatusCode.ToString();
         await Js.InvokeVoidAsync("localStorage.setItem", "jwt", tokens.Token);
         await Js.InvokeVoidAsync("localStorage.setItem", "ref", tokens.Ref);
         NavigationManager.NavigateTo("", true, true);
@@ -47,4 +44,5 @@
     {
         NavigationManager.NavigateTo("/register");
     }
+
 }

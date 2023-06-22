@@ -1,0 +1,53 @@
+﻿@using Proj_APBD.Client.Models
+@using System.Net.Http.Headers
+@using Syncfusion.Blazor.Buttons
+@inject HttpClient HttpClient
+@inject UserData UserData
+
+<div class="sdp-layout">
+    <div class="sdp-pic">
+        <img height="100%" src="@Stock.LogoUrl" alt="@Stock.Ticker"/>
+    </div>
+    <div class="sdp-text">
+        <div class="sdp-name">
+            <h2>@Stock.Name (@Stock.Ticker)</h2>
+        </div>
+        <div class="sdp-details">
+            <div class="pad-t">Country: @Stock.Country</div>
+            <div class="pad-t">Industry: @Stock.Sector</div>
+            <div class="pad-t">
+                <div>Watchlist</div>
+                <SfSwitch @bind-Checked="@IsWatched" @onclick="@ManageWatchList"></SfSwitch>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public StockData Stock { get; set; }
+
+    private bool IsWatched { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var message = new HttpRequestMessage(HttpMethod.Get, $"api/Stocks/watch/{Stock.Ticker}");
+        message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", UserData.Token);
+        var response = await HttpClient.SendAsync(message);
+        IsWatched = await response.Content.ReadFromJsonAsync<bool>();
+    }
+
+    private async Task ManageWatchList()
+    {
+        var message = new HttpRequestMessage(!IsWatched ? HttpMethod.Post : HttpMethod.Delete, $"api/Stocks/watch/{Stock.Ticker}");
+        message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", UserData.Token);
+        var response = await HttpClient.SendAsync(message);
+        Console.WriteLine(response.StatusCode);
+        if (!response.IsSuccessStatusCode)
+        {
+            IsWatched = !IsWatched;
+        }
+    }
+
+}
