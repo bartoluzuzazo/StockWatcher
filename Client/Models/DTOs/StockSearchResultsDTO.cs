@@ -2,6 +2,6 @@
 
 public class StockSearchResultsDTO
 {
-    public List<StockSearchDTO> results { get; set; }
-    public string? next_url { get; set; }
+    public List<StockSearchDTO> results { get; set; } = null!;
+    public string? next_url { get; set; } = null!;
 }

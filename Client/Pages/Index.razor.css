@@ -1,9 +1,9 @@
 ﻿.headline{
-    padding: 1vh 1vw;
+    padding: 30px 0 15px 20px;
     font-family: Andale Mono, monospace;
 }
 .search{
-    padding: 0 1vw;
+    padding: 0 20px;
 }
 .autocomplete{
     table-layout: fixed;
@@ -12,8 +12,8 @@
 .stockname{
     text-overflow: ellipsis;
 }
-.chart{
-    padding: 2vh 1vw;
+.mid-pad{
+    padding: 40px 20px;
 }
 .stockdata{
     height: 20vh;

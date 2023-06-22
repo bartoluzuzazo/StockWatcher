@@ -1,16 +1,59 @@
 ﻿@using Syncfusion.Blazor.Layouts
 @using Proj_APBD.Client.Models
+@using Proj_APBD.Shared.Models.DTOs
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Buttons
+@using SelectionType = Syncfusion.Blazor.Grids.SelectionType
+@inject NavigationManager NavigationManager
 
-<SfDashboardLayout Columns="4" AllowDragging="true">
-    <DashboardLayoutPanels >
-        @foreach (var stock in WatchedStocks)
-        {
-            <WatchlistItem Stock="@stock"/>
-        }
-    </DashboardLayoutPanels>
-</SfDashboardLayout>
+<SfGrid DataSource="@WatchedStocks" EnableHeaderFocus="true" AllowSelection="true" AllowSorting="true" AllowFiltering="true" EnableVirtualization="true" AllowPaging="true" EnableVirtualMaskRow="true" EnableHover="false" Height="600" RowHeight="38">
+    <GridFilterSettings Type="FilterType.Menu"/>
+    <GridPageSettings PageSize="40"/>
+    <GridSelectionSettings CheckboxOnly="true" PersistSelection="true" Type="SelectionType.Multiple"/>
+    <GridColumns>
+        <GridColumn Type="ColumnType.CheckBox" AllowFiltering="false" AllowSorting="false" Width="30"/>
+        <GridColumn Field="Ticker" HeaderText="Ticker" Width="50" IsPrimaryKey="true" FilterSettings="@(new FilterSettings { Type = FilterType.Menu })"/>
+        <GridColumn Field="Name" HeaderText="Name" Width="200" ClipMode="ClipMode.EllipsisWithTooltip">
+            <Template>
+                @{
+                    var stock = (context as StockDataDTO);
+                    <div class="namefield">
+                        <div class="empimg">
+                            <img src="@stock.LogoUrl" height="40px" alt="@stock.Ticker"/>
+                        </div>
+                        <span id="Emptext">@stock.Name</span>
+                    </div>
+                }
+            </Template>
+        </GridColumn>
+        <GridColumn Field="Sector" Width="300" FilterSettings="@(new FilterSettings { Type = FilterType.Menu })" ClipMode="ClipMode.EllipsisWithTooltip"/>
+        <GridColumn Field="Country" FilterSettings="@(new FilterSettings { Type = FilterType.CheckBox })" Width="60">
+            <Template>
+                @{
+                    var stock = context as StockDataDTO;
+                    <div class="loc">
+                        <img src="https://flagsapi.com/@stock.Country/shiny/64.png" height="40px" class="e-image" alt=@stock.Country/>
+                        <span id="locationtext">@stock.Country</span>
+                    </div>
+                }
+            </Template>
+        </GridColumn>
+        <GridColumn Width="40">
+            <Template>
+                @{
+                    var stock = context as StockDataDTO;
+                    <div class="loc">
+                        <SfButton @onclick="() => NavigationManager.NavigateTo(stock.Ticker)">See chart</SfButton>
+                    </div>
+                }
+            </Template>
+        </GridColumn>
+    </GridColumns>
+</SfGrid>
 
 @code {
+
     [Parameter]
-    public List<StockData> WatchedStocks { get; set; }
+    public List<StockDataDTO> WatchedStocks { get; set; } = null!;
+
 }

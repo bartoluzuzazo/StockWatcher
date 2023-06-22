@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
 namespace Proj_APBD.Server.Models;
@@ -8,7 +9,11 @@ public class UserStock
 {
     public Guid UserId { get; set; }
     
-    public string StockTicker { get; set; }
+    [MaxLength(10)]
+    public string StockTicker { get; set; } = null!;
+    
+    [Microsoft.Build.Framework.Required]
+    public DateTime AddedAt { get; set; }
     
     [ForeignKey(nameof(StockTicker))]
     public virtual Stock Stock { get; set; } = null!;

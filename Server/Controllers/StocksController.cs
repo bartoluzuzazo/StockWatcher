@@ -19,7 +19,7 @@ public class StocksController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetStockData(string ticker)
+    public async Task<IActionResult> GetStockChartData(string ticker)
     {
         var response = await _stockServices.GetStockPriceOnlineAsync(ticker);
         if (response is null) return NotFound();
@@ -30,9 +30,9 @@ public class StocksController : ControllerBase
     public async Task<IActionResult> AddStockToWatchlist(string ticker)
     {
         var user = await _accountServices.GetUserAsync(User);
-        var stock = await _stockServices.GetOrAddStock(ticker);
-        await _stockServices.AddToWatchlist(user, stock);
-        await _stockServices.SaveChanges();
+        var stock = await _stockServices.GetOrAddStockAsync(ticker);
+        await _stockServices.AddToWatchlistAsync(user, stock);
+        await _stockServices.SaveChangesAsync();
         return Created("", stock.Ticker);
     }
 
@@ -40,10 +40,10 @@ public class StocksController : ControllerBase
     public async Task<IActionResult> RemoveStockFromWatchlist(string ticker)
     {
         var user = await _accountServices.GetUserAsync(User);
-        var stock = await _stockServices.GetOrAddStock(ticker);
-        await _stockServices.RemoveFromWatchlist(user, stock);
-        await _stockServices.RemoveStockIfNotWatched(stock);
-        await _stockServices.SaveChanges();
+        var stock = await _stockServices.GetOrAddStockAsync(ticker);
+        await _stockServices.RemoveFromWatchlistAsync(user, stock);
+        await _stockServices.RemoveStockIfNotWatchedAsync(stock);
+        await _stockServices.SaveChangesAsync();
         return Ok();
     }
 
@@ -51,7 +51,7 @@ public class StocksController : ControllerBase
     public async Task<IActionResult> IsStockWatched(string ticker)
     {
         var user = await _accountServices.GetUserAsync(User);
-        var response = await _stockServices.IsStockWatched(user, ticker);
+        var response = await _stockServices.IsStockWatchedAsync(user, ticker);
         return Ok(response);
     }
 
@@ -61,5 +61,11 @@ public class StocksController : ControllerBase
         var user = await _accountServices.GetUserAsync(User);
         var response = await _stockServices.GetWatchedStocks(user);
         return Ok(response);
+    }
+
+    [HttpGet("data/{ticker}")]
+    public async Task<IActionResult> GetStockData(string ticker)
+    {
+        return Ok(await _stockServices.GetOrAddStockAsync(ticker));
     }
 }

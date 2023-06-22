@@ -1,0 +1,8 @@
+﻿.namefield {
+    display: flex;
+    align-items: center;
+}
+
+.namefield>div{
+    padding: 15px;
+}

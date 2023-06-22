@@ -1,0 +1,28 @@
+﻿@using Proj_APBD.Client.Models
+@using Syncfusion.Blazor.Navigations
+
+<TabItem>
+    <ChildContent>
+        <TabHeader Text="@ArticleData.published_utc"></TabHeader>
+    </ChildContent>
+    <ContentTemplate>
+        <div>
+            @ArticleData.title
+        </div>
+        <div>
+            @ArticleData.author - @ArticleData.publisher.name
+        </div>
+        <div>
+            <a href="@ArticleData.amp_url" target="_blank">
+                @ArticleData.amp_url
+            </a>
+        </div>
+    </ContentTemplate>
+</TabItem>
+
+@code {
+
+    [Parameter]
+    public ArticleDTO ArticleData { get; set; } = null!;
+
+}

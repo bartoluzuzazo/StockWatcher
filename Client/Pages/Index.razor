@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/{ticker?}"
 @using Proj_APBD.Client.Models.DTOs
 @using Syncfusion.Blazor.DropDowns
 @using Proj_APBD.Client.Models
@@ -69,18 +69,20 @@
     }
     else
     {
-        <SfSkeleton CssClass="skeletonRectangle" Shape=SkeletonType.Rectangle Width="100%" Height="20vh"></SfSkeleton>
+        <div class="mid-pad">
+            <SfSkeleton CssClass="skeletonRectangle" Shape=SkeletonType.Rectangle Width="100%" Height="20vh"></SfSkeleton>
+        </div>
     }
-    
+
     if (DataSource is not null)
     {
-        <div class="chart">
+        <div class="mid-pad">
             <StockChart Ticker="@Selected.Ticker" DataSource="@DataSource"/>
         </div>
     }
     else
     {
-        <div class="chart">
+        <div class="mid-pad">
             <SfSkeleton CssClass="skeletonRectangle" Shape=SkeletonType.Rectangle Width="100%" Height="50px"></SfSkeleton>
             <SfSkeleton CssClass="skeletonRectangle" Shape=SkeletonType.Rectangle Width="100%" Height="50px"></SfSkeleton>
             <SfSkeleton CssClass="skeletonRectangle" Shape=SkeletonType.Rectangle Width="100%" Height="100px"></SfSkeleton>
@@ -88,9 +90,26 @@
             <SfSkeleton CssClass="skeletonRectangle" Shape=SkeletonType.Rectangle Width="100%" Height="30px"></SfSkeleton>
         </div>
     }
+    
+    if (Articles is not null)
+    {
+        <div class="mid-pad">
+            <ArticleTable Articles="@Articles"/>
+        </div>
+    }
+    else
+    {
+        <div class="mid-pad">
+            <SfSkeleton CssClass="skeletonRectangle" Shape=SkeletonType.Rectangle Width="100%" Height="15vh"></SfSkeleton>
+        </div>
+    }
 }
 
 @code{
+
+    [Parameter]
+    public string? ticker { get; set; }
+
     private StockSearchAutocompleteEntry? Selected { get; set; }
     private List<StockChartData>? DataSource { get; set; }
     private StockData? CurrentStock { get; set; }
@@ -99,17 +118,30 @@
 
     private bool Loading { get; set; }
 
+    private List<ArticleDTO>? Articles { get; set; }
+
     private List<StockSearchAutocompleteEntry> Autocomplete { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (ticker is not null)
+        {
+            await OnStockSelected(new StockSearchAutocompleteEntry() { Ticker = ticker });
+        }
+    }
 
     private async Task OnStockSelected(StockSearchAutocompleteEntry newStock)
     {
         Selected = newStock;
         CurrentStock = null;
         DataSource = null;
+        Articles = null;
 
         await GetStockInfo(newStock.Ticker);
 
         await GetStockChart();
+
+        await GetArticles();
     }
 
     private async Task OnSearchModified(ChangeEventArgs e)
@@ -165,6 +197,13 @@
             low = (double)r.l,
             volume = (double)r.v
         }).ToList();
+    }
+
+    private async Task GetArticles()
+    {
+        var response = await HttpClient.GetAsync($"https://api.polygon.io/v2/reference/news?ticker={CurrentStock.Ticker}&order=desc&limit=10&sort=published_utc&apiKey=HGcdymSzKJINAJplybiYm7S6bVrcSe3a");
+        var result = await response.Content.ReadFromJsonAsync<ArticleResponseDTO>();
+        Articles = result.results;
     }
 
 }

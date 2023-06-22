@@ -1,0 +1,26 @@
+﻿@using Proj_APBD.Client.Models.DTOs
+@using Proj_APBD.Client.Models
+@using Syncfusion.Blazor.Navigations
+@inject HttpClient HttpClient
+
+<h2>Newest 10 articles</h2>
+
+<SfTab CssClass="default-tab">
+    <TabAnimationSettings>
+        <TabAnimationPrevious Effect="AnimationEffect.None"></TabAnimationPrevious>
+        <TabAnimationNext Effect="AnimationEffect.None"></TabAnimationNext>
+    </TabAnimationSettings>
+    <TabItems>
+        @foreach (var article in Articles)
+        {
+            <Article ArticleData="@article"></Article>
+        }
+    </TabItems>
+</SfTab>
+
+@code {
+    
+    [Parameter]
+    public List<ArticleDTO> Articles { get; set; }
+    
+}
