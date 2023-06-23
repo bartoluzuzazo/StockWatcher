@@ -2,9 +2,11 @@
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Buttons
 @using Proj_APBD.Shared.Models.DTOs
+@using System.Net
 @inject NavigationManager NavigationManager
 @inject HttpClient HttpClient
 @inject IJSRuntime Js
+@using Syncfusion.Blazor.Notifications
 
 <div class="center">
     <h3>Login</h3>
@@ -23,21 +25,51 @@
             <SfButton CssClass="e-flat" IsPrimary="true" @onclick="@OnRegister">Register</SfButton>
         </div>
     </div>
+    
+    @if (Message != MessageBox.NONE)
+    {
+        if (Message == MessageBox.INVALID_CREDENTIALS)
+        {
+            <SfMessage Severity="MessageSeverity.Error">Invalid login credentials</SfMessage>
+        }
+        else if (Message == MessageBox.SERVER_FAULT)
+        {
+            <SfMessage Severity="MessageSeverity.Warning">An error occured while trying to log in. Please try again later</SfMessage>
+        }
+    }
 </div>
 
 
 @code {
+
+    enum MessageBox
+    {
+        NONE,
+        INVALID_CREDENTIALS,
+        SERVER_FAULT
+    }
+    
     private string Username { get; set; }
     private string Password { get; set; }
 
+    private MessageBox Message { get; set; } = MessageBox.NONE;
+
     private async Task OnLogin()
     {
+        Message = MessageBox.NONE;
         var dto = new UserDTO() { Username = Username, Password = Password };
         var response = await HttpClient.PostAsJsonAsync("api/Accounts/login", dto);
-        var tokens = await response.Content.ReadFromJsonAsync<JwtDTO>();
-        await Js.InvokeVoidAsync("localStorage.setItem", "jwt", tokens.Token);
-        await Js.InvokeVoidAsync("localStorage.setItem", "ref", tokens.Ref);
-        NavigationManager.NavigateTo("", true, true);
+        if (response.IsSuccessStatusCode)
+        {
+            var tokens = await response.Content.ReadFromJsonAsync<JwtDTO>();
+            await Js.InvokeVoidAsync("localStorage.setItem", "jwt", tokens.Token);
+            await Js.InvokeVoidAsync("localStorage.setItem", "ref", tokens.Ref);
+            NavigationManager.NavigateTo("", true, true);
+        }
+        else
+        {
+            Message = response.StatusCode == HttpStatusCode.Unauthorized ? MessageBox.INVALID_CREDENTIALS : MessageBox.SERVER_FAULT;
+        }
     }
 
     private void OnRegister()

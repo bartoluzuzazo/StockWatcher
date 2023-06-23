@@ -32,6 +32,10 @@ namespace Proj_APBD.Server.Controllers
         public async Task<IActionResult> Login(UserDTO dto)
         {
             var result = await _services.Login(dto.Username, dto.Password);
+            if (result.Item1 == 401)
+            {
+                return Unauthorized();
+            }
             return Ok(new JwtDTO()
             {
                 Token = result.Item2,
