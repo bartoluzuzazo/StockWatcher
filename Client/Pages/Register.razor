@@ -5,6 +5,8 @@
 @inject NavigationManager NavigationManager
 @inject HttpClient HttpClient
 @inject IJSRuntime Js
+@using Syncfusion.Blazor.Notifications
+@using System.Net
 
 <div class="center">
 
@@ -27,17 +29,46 @@
             <SfButton CssClass="e-flat" IsPrimary="true" @onclick="@GoBack">Go Back</SfButton>
         </div>
     </div>
+    
+    @if (Message != MessageBox.NONE)
+        {
+            switch (Message)
+            {
+                case MessageBox.DIFFERENT_PASSWORDS:
+                    <SfMessage Severity="@MessageSeverity.Error">Provided passwords are not the same</SfMessage>
+                    break;
+                case MessageBox.CONFLICT:
+                    <SfMessage Severity="@MessageSeverity.Error">Username already exists</SfMessage>
+                    break;
+                case MessageBox.SERVER_FAULT:
+                    <SfMessage Severity="@MessageSeverity.Warning">An error occured while trying to register. Please try again later</SfMessage>
+                    break;
+            }
+        }
 </div>
 
 @code {
+    
+    private enum MessageBox
+    {
+        NONE,
+        DIFFERENT_PASSWORDS,
+        CONFLICT,
+        SERVER_FAULT
+    }
+    private MessageBox Message { get; set; } = MessageBox.NONE;
+
     private string Username { get; set; }
     private string NewPassword { get; set; }
     private string RepeatNewPassword { get; set; }
 
     private async Task OnRegister()
     {
+        Message = MessageBox.NONE;
+
         if (NewPassword != RepeatNewPassword)
         {
+            Message = MessageBox.DIFFERENT_PASSWORDS;
             return;
         }
 
@@ -45,7 +76,7 @@
         var registerResponse = await HttpClient.PostAsJsonAsync("api/Accounts/register", dto);
         if (!registerResponse.IsSuccessStatusCode)
         {
-            Console.WriteLine(registerResponse.StatusCode);
+            Message = registerResponse.StatusCode == HttpStatusCode.Conflict ? MessageBox.CONFLICT : MessageBox.SERVER_FAULT;
             return;
         }
 
