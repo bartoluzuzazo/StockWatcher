@@ -4,7 +4,7 @@ StockWatcher is a fullstack web application made using C# with EntityFramework a
 
 This website allows the user to search stock prices and news regarding the selected company. Futhermore, the user can add any stock to the private watchlist. 
 
-All stock data is downloaded form [polygon.io/docs](Polygon.io). 
+All stock data is downloaded form [Polygon.io](polygon.io/docs). 
 
 All user data and cached stock informations are stored in Microsoft SQL Server database.
 
