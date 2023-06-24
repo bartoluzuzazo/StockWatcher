@@ -2,11 +2,16 @@
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Buttons
 @using Proj_APBD.Shared.Models.DTOs
+@using Syncfusion.Blazor.Notifications
+@using System.Net
+@using System.Net.Http.Headers
+@using Proj_APBD.Client.Models
 @inject NavigationManager NavigationManager
 @inject HttpClient HttpClient
 @inject IJSRuntime Js
-@using Syncfusion.Blazor.Notifications
-@using System.Net
+@inject UserData UserData
+
+<PageTitle>Register</PageTitle>
 
 <div class="center">
 
@@ -84,7 +89,8 @@
         var tokens = await loginResponse.Content.ReadFromJsonAsync<JwtDTO>();
         await Js.InvokeVoidAsync("localStorage.setItem", "jwt", tokens.Token);
         await Js.InvokeVoidAsync("localStorage.setItem", "ref", tokens.Ref);
-        NavigationManager.NavigateTo("/account");
+        
+        NavigationManager.NavigateTo("/account", true, true);
     }
 
     private void GoBack()

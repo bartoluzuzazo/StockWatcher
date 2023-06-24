@@ -8,6 +8,8 @@
 @inject IJSRuntime Js
 @using Syncfusion.Blazor.Notifications
 
+<PageTitle>Login</PageTitle>
+
 <div class="center">
     <h3>Login</h3>
     <div class="field col-xs-6 col-sm-6 col-lg-6 col-md-6">
@@ -16,7 +18,7 @@
     <div class="field col-xs-6 col-sm-6 col-lg-6 col-md-6">
         <SfTextBox Placeholder="Password" Type="InputType.Password" OnInput="(e) => Password = e.Value.ToString()"/>
     </div>
-    
+
     <div class="buttons">
         <div class="button">
             <SfButton IsPrimary="true" CssClass="e-outline" @onclick="@OnLogin">Login</SfButton>
@@ -25,7 +27,7 @@
             <SfButton CssClass="e-flat" IsPrimary="true" @onclick="@OnRegister">Register</SfButton>
         </div>
     </div>
-    
+
     @if (Message != MessageBox.NONE)
     {
         if (Message == MessageBox.INVALID_CREDENTIALS)

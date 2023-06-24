@@ -1,21 +1,21 @@
 ﻿@page "/account"
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Buttons
-@using Proj_APBD.Shared.Models.DTOs
-@using System.Net.Http.Headers
 @using Proj_APBD.Client.Models
-@using Proj_APBD.Client.Models.DTOs
 @using Syncfusion.Blazor.Layouts
 @inject IJSRuntime Js
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 @inject UserData UserData
 
-<h3>Account</h3>
+<PageTitle>Account</PageTitle>
+<div class="headline">
+    <h1>Account</h1>
+</div>
 
-<div style="width: 50%;">
+<div class="w-50">
     <SfDashboardLayout Columns="2" AllowDragging="false">
-        <DashboardLayoutPanels >
+        <DashboardLayoutPanels>
             <DashboardLayoutPanel Column="0" Row="0">
                 <HeaderTemplate>
                     <div>Account settings</div>
@@ -31,11 +31,11 @@
                             <div>@Id</div>
                         </div>
                         <div>Role</div>
-                        <div >
+                        <div>
                             <div>@Role</div>
                         </div>
                         <div>
-                            <SfButton CssClass="e-danger" @onclick="@Logout">Logout</SfButton>
+                            <SfButton CssClass="e-danger" >Delete Account</SfButton>
                         </div>
                     </div>
                 </ContentTemplate>
@@ -55,7 +55,7 @@
                         <SfTextBox Placeholder="Repeat New Password" Type="InputType.Password" OnInput="(e) => RepeatNewPassword = e.Value.ToString()"/>
                     </div>
                     <div class="col-xs-12 col-sm-12 col-lg-6 col-md-6">
-                        <SfButton CssClass="e-danger" @onclick="@Logout">Submit</SfButton>
+                        <SfButton CssClass="e-danger" >Submit</SfButton>
                     </div>
                 </ContentTemplate>
             </DashboardLayoutPanel>
@@ -81,11 +81,11 @@
         Role = UserData.Role;
     }
 
-    private async Task Logout()
+    /*private async Task Logout()
     {
         await Js.InvokeVoidAsync("localStorage.setItem", "jwt", "");
         await Js.InvokeVoidAsync("localStorage.setItem", "ref", "");
         NavigationManager.NavigateTo("/login");
-    }
+    }*/
 
 }

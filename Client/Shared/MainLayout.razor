@@ -1,6 +1,7 @@
 ﻿@using System.Net.Http.Headers
 @using Proj_APBD.Shared.Models.DTOs
 @using Proj_APBD.Client.Models
+@using Syncfusion.Blazor.Spinner
 @inherits LayoutComponentBase
 @inject IJSRuntime Js
 @inject NavigationManager NavigationManager
@@ -8,17 +9,25 @@
 @inject UserData UserData
 
 <div>
-    
-    <Nav @ref="@Navigation"/>
+    @if (LoggedIn)
+    {
+        <Nav @ref="@Navigation"/>
 
-    <main>
-        <article class="">
-            @Body
-        </article>
-    </main>
+        <main>
+            <article class="">
+                @Body
+            </article>
+        </main>
+    }
+    else
+    {
+        <SfSpinner Size="40" Label="Logging in" Type="SpinnerType.Tailwind" Visible="true"/>
+    }
+    
 </div>
 
 @code{
+
     private Nav Navigation { get; set; }
 
     private bool LoggedIn { get; set; }
@@ -29,6 +38,7 @@
         var token = await Js.InvokeAsync<string>("localStorage.getItem", "jwt");
         if (token == "")
         {
+            LoggedIn = true;
             NavigationManager.NavigateTo("/login");
             return;
         }
@@ -37,6 +47,7 @@
         var response = await HttpClient.SendAsync(message);
         if (!response.IsSuccessStatusCode)
         {
+            LoggedIn = true;
             NavigationManager.NavigateTo("/login");
             return;
         }
@@ -47,6 +58,8 @@
         UserData.Username = claims!.First(c => c.Type == "Username").Value;
         UserData.Role = claims!.First(c => c.Type == "Role").Value;
         LoggedIn = true;
+        StateHasChanged();
+        Console.WriteLine(LoggedIn);
         UserData.NavLock = false;
         Navigation.Refresh();
     }
