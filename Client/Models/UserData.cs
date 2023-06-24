@@ -6,4 +6,5 @@ public class UserData
     public string Id { get; set; } = null!;
     public string Username { get; set; } = null!;
     public string Role { get; set; } = null!;
+    public bool NavLock { get; set; }
 }

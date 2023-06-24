@@ -1,10 +1,12 @@
 ﻿@using Syncfusion.Blazor.SplitButtons
+@using Proj_APBD.Client.Models
 @inject NavigationManager NavigationManager
 @inject IJSRuntime Js
+@inject UserData UserData
 
 <div class="nav-1">
     <div class="menu">
-        <SfDropDownButton Content="Profile" IconCss="e-ddb-icons e-profile">
+        <SfDropDownButton Disabled="@UserData.NavLock" Content="Profile" IconCss="e-ddb-icons e-profile">
             <DropDownButtonEvents ItemSelected="OnItemSelected" />
             <DropDownMenuItems>
                 <DropDownMenuItem Id="dashboard" Text="Dashboard" Url="" IconCss="e-ddb-icons e-dashboard"/>
@@ -28,7 +30,12 @@
     {
         await Js.InvokeVoidAsync("localStorage.setItem", "jwt", "");
         await Js.InvokeVoidAsync("localStorage.setItem", "ref", "");
+        UserData.NavLock = true;
+        Refresh();
     }
-    
-    
+
+    public void Refresh()
+    {
+        StateHasChanged();
+    }
 }

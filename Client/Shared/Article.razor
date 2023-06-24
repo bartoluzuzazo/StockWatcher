@@ -1,21 +1,31 @@
 ﻿@using Proj_APBD.Client.Models
 @using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Buttons
+@inject NavigationManager NavigationManager
 
 <TabItem>
     <ChildContent>
-        <TabHeader Text="@ArticleData.published_utc.ToString("dddd, dd MMMM yyyy HH:mm")"></TabHeader>
+        <TabHeader Text="@ArticleData.published_utc.ToString("dddd, dd MMMM yyyy HH:mm")"/>
     </ChildContent>
     <ContentTemplate>
-        <div>
-            @ArticleData.title
-        </div>
-        <div>
-            @ArticleData.author - @ArticleData.publisher.name
-        </div>
-        <div>
-            <a href="@ArticleData.amp_url" target="_blank">
-                @ArticleData.amp_url
-            </a>
+        <div class="aricle-box">
+            <div class="pic">
+                <img src="@ArticleData.image_url" alt=""/>
+            </div>
+            <div>
+                <div class="f-a-20 p-10">
+                    @ArticleData.title
+                </div>
+                <div class="f-a-15 p-10">
+                    @ArticleData.author - @ArticleData.publisher.name
+                </div>
+                <div class="p-10">
+                    <a href="@ArticleData.article_url" target="_blank">
+                        <SfButton IsPrimary="true" CssClass="e-outline">Read</SfButton>
+                    </a>
+                </div>
+            </div>
+
         </div>
     </ContentTemplate>
 </TabItem>

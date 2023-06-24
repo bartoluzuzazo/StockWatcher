@@ -1,0 +1,24 @@
+.aricle-box{
+    display: flex;
+}
+
+.pic{
+    height: 20vh;
+}
+
+.pic>img{
+    height: 100%;
+}
+
+.f-a-20{
+    font: 20px Arial;
+}
+
+.f-a-15{
+    font: 15px Arial;
+}
+
+.p-10{
+    padding: 10px;
+}
+

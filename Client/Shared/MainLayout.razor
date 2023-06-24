@@ -9,7 +9,7 @@
 
 <div>
     
-    <Nav/>
+    <Nav @ref="@Navigation"/>
 
     <main>
         <article class="">
@@ -19,11 +19,13 @@
 </div>
 
 @code{
+    private Nav Navigation { get; set; }
 
     private bool LoggedIn { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
+        UserData.NavLock = true;
         var token = await Js.InvokeAsync<string>("localStorage.getItem", "jwt");
         if (token == "")
         {
@@ -45,6 +47,8 @@
         UserData.Username = claims!.First(c => c.Type == "Username").Value;
         UserData.Role = claims!.First(c => c.Type == "Role").Value;
         LoggedIn = true;
+        UserData.NavLock = false;
+        Navigation.Refresh();
     }
 
 }
